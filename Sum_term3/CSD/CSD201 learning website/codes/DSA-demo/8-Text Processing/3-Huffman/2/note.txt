@@ -1,0 +1,62 @@
+Here is the Huffman code for the input file
+
+AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABBBBBBCCCCCCDDDDDDEEEEEEFGHI
+
+
+Display of Huffman coding tree
+           
+           +---D: 0.0938, 000 (step 5)
+           |   
+       +---+---@: 0.1875, 00 (step 7)
+       |   |   
+       |   +---C: 0.0938, 001 (step 5)
+       |   
+   +---+---@: 0.4375, 0 (step 8)
+   |   |       
+   |   |   +---B: 0.0938, 010 (step 6)
+   |   |   |   
+   |   +---+---@: 0.2500, 01 (step 7)
+   |       |   
+   |       |           +---G: 0.0156, 011000 (step 2)
+   |       |           |   
+   |       |       +---+---@: 0.0312, 01100 (step 3)
+   |       |       |   |   
+   |       |       |   +---F: 0.0156, 011001 (step 2)
+   |       |       |   
+   |       |   +---+---@: 0.0625, 0110 (step 4)
+   |       |   |   |       
+   |       |   |   |   +---I: 0.0156, 011010 (step 1)
+   |       |   |   |   |   
+   |       |   |   +---+---@: 0.0312, 01101 (step 3)
+   |       |   |       |   
+   |       |   |       +---H: 0.0156, 011011 (step 1)
+   |       |   |   
+   |       +---+---@: 0.1562, 011 (step 6)
+   |           |   
+   |           +---E: 0.0938, 0111 (step 4)
+   |   
+   +---@: 1.0000, 
+   |   
+   +---A: 0.5625, 1 (step 8)
+       
+Dump of Table ----->
+  Size: 9
+Entry 0. Symbol: A, Weight: 0.5625, Representation: 1
+Entry 1. Symbol: B, Weight: 0.09375, Representation: 010
+Entry 2. Symbol: C, Weight: 0.09375, Representation: 001
+Entry 3. Symbol: D, Weight: 0.09375, Representation: 000
+Entry 4. Symbol: E, Weight: 0.09375, Representation: 0111
+Entry 5. Symbol: F, Weight: 0.015625, Representation: 011001
+Entry 6. Symbol: G, Weight: 0.015625, Representation: 011000
+Entry 7. Symbol: H, Weight: 0.015625, Representation: 011011
+Entry 8. Symbol: I, Weight: 0.015625, Representation: 011010
+----> End Dump of Table
+
+Input file (as a String):
+AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABBBBBBCCCCCCDDDDDDEEEEEEFGHI
+
+Encoded file (as a String):
+111111111111111111111111111111111111010010010010010010001001001001001001000000000000000000011101110111011101110111011001011000011011011010
+
+Decoded file (as a String):
+AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABBBBBBCCCCCCDDDDDDEEEEEEFGHI
