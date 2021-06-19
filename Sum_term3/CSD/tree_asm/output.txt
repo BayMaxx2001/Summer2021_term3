@@ -1,7 +1,0 @@
-B01        | The noon          | 10  | 9   | 5.20      
-B02        | River             | 5   | 5   | 4.30      
-B03        | Morning           | 12  | 9   | 25.10     
-B04        | Southern          | 9   | 8   | 5.20      
-B05        | Physics           | 7   | 2   | 15.40     
-B07        | Biology           | 11  | 10  | 12.20     
-B08        | Math              | 100 | 10  | 50.00     

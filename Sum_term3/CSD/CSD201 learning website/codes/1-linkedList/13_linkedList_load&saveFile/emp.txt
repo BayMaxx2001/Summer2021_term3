@@ -1,3 +1,0 @@
-Tran Ha     |  22  |  500
-Nguyen Quan |  35  |  600
-Le Lan      |  30  |  550

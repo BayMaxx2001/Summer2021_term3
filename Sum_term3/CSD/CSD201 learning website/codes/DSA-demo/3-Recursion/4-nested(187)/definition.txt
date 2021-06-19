@@ -1,4 +1,0 @@
-/*
-a function is not only defined in terms of itself,
-but also is used as one of the parameters.
-*/
