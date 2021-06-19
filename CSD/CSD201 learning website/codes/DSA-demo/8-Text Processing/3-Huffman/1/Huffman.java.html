@@ -1,0 +1,228 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html lang = "en">
+
+<head>
+
+<link rel="icon"          href="/algs4/favicon.ico" type="image/x-icon">
+<link rel="shortcut icon" href="/algs4/favicon.ico" type="image/x-icon">
+<link rel="stylesheet"    href="/algs4/java.css" type="text/css">
+
+<title>Huffman.java</title>
+
+<meta HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=iso-8859-1">
+<meta NAME="AUTHOR" CONTENT="Robert Sedgewick and Kevin Wayne">
+<meta NAME="DESCRIPTION" CONTENT="Huffman code in Java">
+<meta NAME="TITLE" CONTENT="Huffman code in Java">
+<meta NAME="KEYWORDS" CONTENT="Huffman,java,programming,computer science,algorithm,data structure,program,code">
+<meta NAME="ROBOTS" CONTENT="INDEX,FOLLOW">
+
+</head>
+
+
+<body>
+<center><h1>Huffman.java</h1></center><p><br>
+
+Below is the syntax highlighted version of <a href = "Huffman.java">Huffman.java</a>
+from <a href = "/algs4/55compression">&#167;5.5 Data Compression</a>.
+<p><br>
+
+<!-- Generator: GNU source-highlight 2.5
+by Lorenzo Bettini
+http://www.lorenzobettini.it
+http://www.gnu.org/software/src-highlite -->
+<pre><tt><span class="comment">/*************************************************************************</span>
+<span class="comment"> *  Compilation:  javac Huffman.java</span>
+<span class="comment"> *  Execution:    java Huffman - &lt; input.txt   (compress)</span>
+<span class="comment"> *  Execution:    java Huffman + &lt; input.txt   (expand)</span>
+<span class="comment"> *  Dependencies: BinaryIn.java BinaryOut.java</span>
+<span class="comment"> *</span>
+<span class="comment"> *  Compress or expand a binary input stream using the Huffman algorithm.</span>
+<span class="comment"> *</span>
+<span class="comment"> *  % java Huffman - &lt; abra.txt | java BinaryDump 60</span>
+<span class="comment"> *  010100000100101000100010010000110100001101010100101010000100</span>
+<span class="comment"> *  000000000000000000000000000110001111100101101000111110010100</span>
+<span class="comment"> *  120 bits</span>
+<span class="comment"> *</span>
+<span class="comment"> *  % java Huffman - &lt; abra.txt | java Huffman +</span>
+<span class="comment"> *  ABRACADABRA!</span>
+<span class="comment"> *</span>
+<span class="comment"> *************************************************************************/</span>
+
+<span class="keyword">public</span><span class="normal"> </span><span class="keyword">class</span><span class="normal"> Huffman </span><span class="cbracket">{</span>
+
+<span class="normal">    </span><span class="comment">// alphabet size of extended ASCII</span>
+<span class="normal">    </span><span class="keyword">private</span><span class="normal"> </span><span class="keyword">static</span><span class="normal"> </span><span class="keyword">final</span><span class="normal"> </span><span class="type">int</span><span class="normal"> R </span><span class="symbol">=</span><span class="normal"> </span><span class="number">256</span><span class="symbol">;</span>
+
+<span class="normal">    </span><span class="comment">// Huffman trie node</span>
+<span class="normal">    </span><span class="keyword">private</span><span class="normal"> </span><span class="keyword">static</span><span class="normal"> </span><span class="keyword">class</span><span class="normal"> Node </span><span class="keyword">implements</span><span class="normal"> Comparable</span><span class="symbol">&lt;</span><span class="normal">Node</span><span class="symbol">&gt;</span><span class="normal"> </span><span class="cbracket">{</span>
+<span class="normal">        </span><span class="keyword">private</span><span class="normal"> </span><span class="keyword">final</span><span class="normal"> </span><span class="type">char</span><span class="normal"> ch</span><span class="symbol">;</span>
+<span class="normal">        </span><span class="keyword">private</span><span class="normal"> </span><span class="keyword">final</span><span class="normal"> </span><span class="type">int</span><span class="normal"> freq</span><span class="symbol">;</span>
+<span class="normal">        </span><span class="keyword">private</span><span class="normal"> </span><span class="keyword">final</span><span class="normal"> Node left</span><span class="symbol">,</span><span class="normal"> right</span><span class="symbol">;</span>
+
+<span class="normal">        </span><span class="function">Node</span><span class="symbol">(</span><span class="type">char</span><span class="normal"> ch</span><span class="symbol">,</span><span class="normal"> </span><span class="type">int</span><span class="normal"> freq</span><span class="symbol">,</span><span class="normal"> Node left</span><span class="symbol">,</span><span class="normal"> Node right</span><span class="symbol">)</span><span class="normal"> </span><span class="cbracket">{</span>
+<span class="normal">            </span><span class="keyword">this</span><span class="symbol">.</span><span class="normal">ch    </span><span class="symbol">=</span><span class="normal"> ch</span><span class="symbol">;</span>
+<span class="normal">            </span><span class="keyword">this</span><span class="symbol">.</span><span class="normal">freq  </span><span class="symbol">=</span><span class="normal"> freq</span><span class="symbol">;</span>
+<span class="normal">            </span><span class="keyword">this</span><span class="symbol">.</span><span class="normal">left  </span><span class="symbol">=</span><span class="normal"> left</span><span class="symbol">;</span>
+<span class="normal">            </span><span class="keyword">this</span><span class="symbol">.</span><span class="normal">right </span><span class="symbol">=</span><span class="normal"> right</span><span class="symbol">;</span>
+<span class="normal">        </span><span class="cbracket">}</span>
+
+<span class="normal">        </span><span class="comment">// is the node a leaf node?</span>
+<span class="normal">        </span><span class="keyword">private</span><span class="normal"> </span><span class="type">boolean</span><span class="normal"> </span><span class="function">isLeaf</span><span class="symbol">()</span><span class="normal"> </span><span class="cbracket">{</span>
+<span class="normal">            </span><span class="keyword">assert</span><span class="normal"> </span><span class="symbol">(</span><span class="normal">left </span><span class="symbol">==</span><span class="normal"> </span><span class="keyword">null</span><span class="normal"> </span><span class="symbol">&amp;&amp;</span><span class="normal"> right </span><span class="symbol">==</span><span class="normal"> </span><span class="keyword">null</span><span class="symbol">)</span><span class="normal"> </span><span class="symbol">||</span><span class="normal"> </span><span class="symbol">(</span><span class="normal">left </span><span class="symbol">!=</span><span class="normal"> </span><span class="keyword">null</span><span class="normal"> </span><span class="symbol">&amp;&amp;</span><span class="normal"> right </span><span class="symbol">!=</span><span class="normal"> </span><span class="keyword">null</span><span class="symbol">);</span>
+<span class="normal">            </span><span class="keyword">return</span><span class="normal"> </span><span class="symbol">(</span><span class="normal">left </span><span class="symbol">==</span><span class="normal"> </span><span class="keyword">null</span><span class="normal"> </span><span class="symbol">&amp;&amp;</span><span class="normal"> right </span><span class="symbol">==</span><span class="normal"> </span><span class="keyword">null</span><span class="symbol">);</span>
+<span class="normal">        </span><span class="cbracket">}</span>
+
+<span class="normal">        </span><span class="comment">// compare, based on frequency</span>
+<span class="normal">        </span><span class="keyword">public</span><span class="normal"> </span><span class="type">int</span><span class="normal"> </span><span class="function">compareTo</span><span class="symbol">(</span><span class="normal">Node that</span><span class="symbol">)</span><span class="normal"> </span><span class="cbracket">{</span>
+<span class="normal">            </span><span class="keyword">return</span><span class="normal"> </span><span class="keyword">this</span><span class="symbol">.</span><span class="normal">freq </span><span class="symbol">-</span><span class="normal"> that</span><span class="symbol">.</span><span class="normal">freq</span><span class="symbol">;</span>
+<span class="normal">        </span><span class="cbracket">}</span>
+<span class="normal">    </span><span class="cbracket">}</span>
+
+
+<span class="normal">    </span><span class="comment">// compress bytes from standard input and write to standard output</span>
+<span class="normal">    </span><span class="keyword">public</span><span class="normal"> </span><span class="keyword">static</span><span class="normal"> </span><span class="type">void</span><span class="normal"> </span><span class="function">compress</span><span class="symbol">()</span><span class="normal"> </span><span class="cbracket">{</span>
+<span class="normal">        </span><span class="comment">// read the input</span>
+<span class="normal">        String s </span><span class="symbol">=</span><span class="normal"> BinaryStdIn</span><span class="symbol">.</span><span class="function">readString</span><span class="symbol">();</span>
+<span class="normal">        </span><span class="type">char</span><span class="symbol">[]</span><span class="normal"> input </span><span class="symbol">=</span><span class="normal"> s</span><span class="symbol">.</span><span class="function">toCharArray</span><span class="symbol">();</span>
+
+<span class="normal">        </span><span class="comment">// tabulate frequency counts</span>
+<span class="normal">        </span><span class="type">int</span><span class="symbol">[]</span><span class="normal"> freq </span><span class="symbol">=</span><span class="normal"> </span><span class="keyword">new</span><span class="normal"> </span><span class="type">int</span><span class="symbol">[</span><span class="normal">R</span><span class="symbol">];</span>
+<span class="normal">        </span><span class="keyword">for</span><span class="normal"> </span><span class="symbol">(</span><span class="type">int</span><span class="normal"> i </span><span class="symbol">=</span><span class="normal"> </span><span class="number">0</span><span class="symbol">;</span><span class="normal"> i </span><span class="symbol">&lt;</span><span class="normal"> input</span><span class="symbol">.</span><span class="normal">length</span><span class="symbol">;</span><span class="normal"> i</span><span class="symbol">++)</span>
+<span class="normal">            freq</span><span class="symbol">[</span><span class="normal">input</span><span class="symbol">[</span><span class="normal">i</span><span class="symbol">]]++;</span>
+
+<span class="normal">        </span><span class="comment">// build Huffman trie</span>
+<span class="normal">        Node root </span><span class="symbol">=</span><span class="normal"> </span><span class="function">buildTrie</span><span class="symbol">(</span><span class="normal">freq</span><span class="symbol">);</span>
+
+<span class="normal">        </span><span class="comment">// build code table</span>
+<span class="normal">        String</span><span class="symbol">[]</span><span class="normal"> st </span><span class="symbol">=</span><span class="normal"> </span><span class="keyword">new</span><span class="normal"> String</span><span class="symbol">[</span><span class="normal">R</span><span class="symbol">];</span>
+<span class="normal">        </span><span class="function">buildCode</span><span class="symbol">(</span><span class="normal">st</span><span class="symbol">,</span><span class="normal"> root</span><span class="symbol">,</span><span class="normal"> </span><span class="string">""</span><span class="symbol">);</span>
+
+<span class="normal">        </span><span class="comment">// print trie for decoder</span>
+<span class="normal">        </span><span class="function">writeTrie</span><span class="symbol">(</span><span class="normal">root</span><span class="symbol">);</span>
+
+<span class="normal">        </span><span class="comment">// print number of bytes in output</span>
+<span class="normal">        BinaryStdOut</span><span class="symbol">.</span><span class="function">write</span><span class="symbol">(</span><span class="normal">input</span><span class="symbol">.</span><span class="normal">length</span><span class="symbol">);</span>
+
+<span class="normal">        </span><span class="comment">// use Huffman code to encode input</span>
+<span class="normal">        </span><span class="keyword">for</span><span class="normal"> </span><span class="symbol">(</span><span class="type">int</span><span class="normal"> i </span><span class="symbol">=</span><span class="normal"> </span><span class="number">0</span><span class="symbol">;</span><span class="normal"> i </span><span class="symbol">&lt;</span><span class="normal"> input</span><span class="symbol">.</span><span class="normal">length</span><span class="symbol">;</span><span class="normal"> i</span><span class="symbol">++)</span><span class="normal"> </span><span class="cbracket">{</span>
+<span class="normal">            String code </span><span class="symbol">=</span><span class="normal"> st</span><span class="symbol">[</span><span class="normal">input</span><span class="symbol">[</span><span class="normal">i</span><span class="symbol">]];</span>
+<span class="normal">            </span><span class="keyword">for</span><span class="normal"> </span><span class="symbol">(</span><span class="type">int</span><span class="normal"> j </span><span class="symbol">=</span><span class="normal"> </span><span class="number">0</span><span class="symbol">;</span><span class="normal"> j </span><span class="symbol">&lt;</span><span class="normal"> code</span><span class="symbol">.</span><span class="function">length</span><span class="symbol">();</span><span class="normal"> j</span><span class="symbol">++)</span><span class="normal"> </span><span class="cbracket">{</span>
+<span class="normal">                </span><span class="keyword">if</span><span class="normal"> </span><span class="symbol">(</span><span class="normal">code</span><span class="symbol">.</span><span class="function">charAt</span><span class="symbol">(</span><span class="normal">j</span><span class="symbol">)</span><span class="normal"> </span><span class="symbol">==</span><span class="normal"> </span><span class="string">'0'</span><span class="symbol">)</span><span class="normal"> </span><span class="cbracket">{</span>
+<span class="normal">                    BinaryStdOut</span><span class="symbol">.</span><span class="function">write</span><span class="symbol">(</span><span class="keyword">false</span><span class="symbol">);</span>
+<span class="normal">                </span><span class="cbracket">}</span>
+<span class="normal">                </span><span class="keyword">else</span><span class="normal"> </span><span class="keyword">if</span><span class="normal"> </span><span class="symbol">(</span><span class="normal">code</span><span class="symbol">.</span><span class="function">charAt</span><span class="symbol">(</span><span class="normal">j</span><span class="symbol">)</span><span class="normal"> </span><span class="symbol">==</span><span class="normal"> </span><span class="string">'1'</span><span class="symbol">)</span><span class="normal"> </span><span class="cbracket">{</span>
+<span class="normal">                    BinaryStdOut</span><span class="symbol">.</span><span class="function">write</span><span class="symbol">(</span><span class="keyword">true</span><span class="symbol">);</span>
+<span class="normal">                </span><span class="cbracket">}</span>
+<span class="normal">                </span><span class="keyword">else</span><span class="normal"> </span><span class="keyword">throw</span><span class="normal"> </span><span class="keyword">new</span><span class="normal"> </span><span class="function">RuntimeException</span><span class="symbol">(</span><span class="string">"Illegal state"</span><span class="symbol">);</span>
+<span class="normal">            </span><span class="cbracket">}</span>
+<span class="normal">        </span><span class="cbracket">}</span>
+
+<span class="normal">        </span><span class="comment">// flush output stream</span>
+<span class="normal">        BinaryStdOut</span><span class="symbol">.</span><span class="function">flush</span><span class="symbol">();</span>
+<span class="normal">    </span><span class="cbracket">}</span>
+
+<span class="normal">    </span><span class="comment">// build the Huffman trie given frequencies</span>
+<span class="normal">    </span><span class="keyword">private</span><span class="normal"> </span><span class="keyword">static</span><span class="normal"> Node </span><span class="function">buildTrie</span><span class="symbol">(</span><span class="type">int</span><span class="symbol">[]</span><span class="normal"> freq</span><span class="symbol">)</span><span class="normal"> </span><span class="cbracket">{</span>
+
+<span class="normal">        </span><span class="comment">// initialze priority queue with singleton trees</span>
+<span class="normal">        MinPQ</span><span class="symbol">&lt;</span><span class="normal">Node</span><span class="symbol">&gt;</span><span class="normal"> pq </span><span class="symbol">=</span><span class="normal"> </span><span class="keyword">new</span><span class="normal"> MinPQ</span><span class="symbol">&lt;</span><span class="normal">Node</span><span class="symbol">&gt;();</span>
+<span class="normal">        </span><span class="keyword">for</span><span class="normal"> </span><span class="symbol">(</span><span class="type">char</span><span class="normal"> i </span><span class="symbol">=</span><span class="normal"> </span><span class="number">0</span><span class="symbol">;</span><span class="normal"> i </span><span class="symbol">&lt;</span><span class="normal"> R</span><span class="symbol">;</span><span class="normal"> i</span><span class="symbol">++)</span>
+<span class="normal">            </span><span class="keyword">if</span><span class="normal"> </span><span class="symbol">(</span><span class="normal">freq</span><span class="symbol">[</span><span class="normal">i</span><span class="symbol">]</span><span class="normal"> </span><span class="symbol">&gt;</span><span class="normal"> </span><span class="number">0</span><span class="symbol">)</span>
+<span class="normal">                pq</span><span class="symbol">.</span><span class="function">insert</span><span class="symbol">(</span><span class="keyword">new</span><span class="normal"> </span><span class="function">Node</span><span class="symbol">(</span><span class="normal">i</span><span class="symbol">,</span><span class="normal"> freq</span><span class="symbol">[</span><span class="normal">i</span><span class="symbol">],</span><span class="normal"> </span><span class="keyword">null</span><span class="symbol">,</span><span class="normal"> </span><span class="keyword">null</span><span class="symbol">));</span>
+
+<span class="normal">        </span><span class="comment">// merge two smallest trees</span>
+<span class="normal">        </span><span class="keyword">while</span><span class="normal"> </span><span class="symbol">(</span><span class="normal">pq</span><span class="symbol">.</span><span class="function">size</span><span class="symbol">()</span><span class="normal"> </span><span class="symbol">&gt;</span><span class="normal"> </span><span class="number">1</span><span class="symbol">)</span><span class="normal"> </span><span class="cbracket">{</span>
+<span class="normal">            Node left  </span><span class="symbol">=</span><span class="normal"> pq</span><span class="symbol">.</span><span class="function">delMin</span><span class="symbol">();</span>
+<span class="normal">            Node right </span><span class="symbol">=</span><span class="normal"> pq</span><span class="symbol">.</span><span class="function">delMin</span><span class="symbol">();</span>
+<span class="normal">            Node parent </span><span class="symbol">=</span><span class="normal"> </span><span class="keyword">new</span><span class="normal"> </span><span class="function">Node</span><span class="symbol">(</span><span class="string">'</span><span class="specialchar">\0</span><span class="string">'</span><span class="symbol">,</span><span class="normal"> left</span><span class="symbol">.</span><span class="normal">freq </span><span class="symbol">+</span><span class="normal"> right</span><span class="symbol">.</span><span class="normal">freq</span><span class="symbol">,</span><span class="normal"> left</span><span class="symbol">,</span><span class="normal"> right</span><span class="symbol">);</span>
+<span class="normal">            pq</span><span class="symbol">.</span><span class="function">insert</span><span class="symbol">(</span><span class="normal">parent</span><span class="symbol">);</span>
+<span class="normal">        </span><span class="cbracket">}</span>
+<span class="normal">        </span><span class="keyword">return</span><span class="normal"> pq</span><span class="symbol">.</span><span class="function">delMin</span><span class="symbol">();</span>
+<span class="normal">    </span><span class="cbracket">}</span>
+
+
+<span class="normal">    </span><span class="comment">// write bitstring-encoded trie to standard output</span>
+<span class="normal">    </span><span class="keyword">private</span><span class="normal"> </span><span class="keyword">static</span><span class="normal"> </span><span class="type">void</span><span class="normal"> </span><span class="function">writeTrie</span><span class="symbol">(</span><span class="normal">Node x</span><span class="symbol">)</span><span class="normal"> </span><span class="cbracket">{</span>
+<span class="normal">        </span><span class="keyword">if</span><span class="normal"> </span><span class="symbol">(</span><span class="normal">x</span><span class="symbol">.</span><span class="function">isLeaf</span><span class="symbol">())</span><span class="normal"> </span><span class="cbracket">{</span>
+<span class="normal">            BinaryStdOut</span><span class="symbol">.</span><span class="function">write</span><span class="symbol">(</span><span class="keyword">true</span><span class="symbol">);</span>
+<span class="normal">            BinaryStdOut</span><span class="symbol">.</span><span class="function">write</span><span class="symbol">(</span><span class="normal">x</span><span class="symbol">.</span><span class="normal">ch</span><span class="symbol">);</span>
+<span class="normal">            </span><span class="keyword">return</span><span class="symbol">;</span>
+<span class="normal">        </span><span class="cbracket">}</span>
+<span class="normal">        BinaryStdOut</span><span class="symbol">.</span><span class="function">write</span><span class="symbol">(</span><span class="keyword">false</span><span class="symbol">);</span>
+<span class="normal">        </span><span class="function">writeTrie</span><span class="symbol">(</span><span class="normal">x</span><span class="symbol">.</span><span class="normal">left</span><span class="symbol">);</span>
+<span class="normal">        </span><span class="function">writeTrie</span><span class="symbol">(</span><span class="normal">x</span><span class="symbol">.</span><span class="normal">right</span><span class="symbol">);</span>
+<span class="normal">    </span><span class="cbracket">}</span>
+
+<span class="normal">    </span><span class="comment">// make a lookup table from symbols and their encodings</span>
+<span class="normal">    </span><span class="keyword">private</span><span class="normal"> </span><span class="keyword">static</span><span class="normal"> </span><span class="type">void</span><span class="normal"> </span><span class="function">buildCode</span><span class="symbol">(</span><span class="normal">String</span><span class="symbol">[]</span><span class="normal"> st</span><span class="symbol">,</span><span class="normal"> Node x</span><span class="symbol">,</span><span class="normal"> String s</span><span class="symbol">)</span><span class="normal"> </span><span class="cbracket">{</span>
+<span class="normal">        </span><span class="keyword">if</span><span class="normal"> </span><span class="symbol">(!</span><span class="normal">x</span><span class="symbol">.</span><span class="function">isLeaf</span><span class="symbol">())</span><span class="normal"> </span><span class="cbracket">{</span>
+<span class="normal">            </span><span class="function">buildCode</span><span class="symbol">(</span><span class="normal">st</span><span class="symbol">,</span><span class="normal"> x</span><span class="symbol">.</span><span class="normal">left</span><span class="symbol">,</span><span class="normal">  s </span><span class="symbol">+</span><span class="normal"> </span><span class="string">'0'</span><span class="symbol">);</span>
+<span class="normal">            </span><span class="function">buildCode</span><span class="symbol">(</span><span class="normal">st</span><span class="symbol">,</span><span class="normal"> x</span><span class="symbol">.</span><span class="normal">right</span><span class="symbol">,</span><span class="normal"> s </span><span class="symbol">+</span><span class="normal"> </span><span class="string">'1'</span><span class="symbol">);</span>
+<span class="normal">        </span><span class="cbracket">}</span>
+<span class="normal">        </span><span class="keyword">else</span><span class="normal"> </span><span class="cbracket">{</span>
+<span class="normal">            st</span><span class="symbol">[</span><span class="normal">x</span><span class="symbol">.</span><span class="normal">ch</span><span class="symbol">]</span><span class="normal"> </span><span class="symbol">=</span><span class="normal"> s</span><span class="symbol">;</span>
+<span class="normal">        </span><span class="cbracket">}</span>
+<span class="normal">    </span><span class="cbracket">}</span>
+
+
+<span class="normal">    </span><span class="comment">// expand Huffman-encoded input from standard input and write to standard output</span>
+<span class="normal">    </span><span class="keyword">public</span><span class="normal"> </span><span class="keyword">static</span><span class="normal"> </span><span class="type">void</span><span class="normal"> </span><span class="function">expand</span><span class="symbol">()</span><span class="normal"> </span><span class="cbracket">{</span>
+
+<span class="normal">        </span><span class="comment">// read in Huffman trie from input stream</span>
+<span class="normal">        Node root </span><span class="symbol">=</span><span class="normal"> </span><span class="function">readTrie</span><span class="symbol">();</span><span class="normal"> </span>
+
+<span class="normal">        </span><span class="comment">// number of bytes to write</span>
+<span class="normal">        </span><span class="type">int</span><span class="normal"> length </span><span class="symbol">=</span><span class="normal"> BinaryStdIn</span><span class="symbol">.</span><span class="function">readInt</span><span class="symbol">();</span>
+
+<span class="normal">        </span><span class="comment">// decode using the Huffman trie</span>
+<span class="normal">        </span><span class="keyword">for</span><span class="normal"> </span><span class="symbol">(</span><span class="type">int</span><span class="normal"> i </span><span class="symbol">=</span><span class="normal"> </span><span class="number">0</span><span class="symbol">;</span><span class="normal"> i </span><span class="symbol">&lt;</span><span class="normal"> length</span><span class="symbol">;</span><span class="normal"> i</span><span class="symbol">++)</span><span class="normal"> </span><span class="cbracket">{</span>
+<span class="normal">            Node x </span><span class="symbol">=</span><span class="normal"> root</span><span class="symbol">;</span>
+<span class="normal">            </span><span class="keyword">while</span><span class="normal"> </span><span class="symbol">(!</span><span class="normal">x</span><span class="symbol">.</span><span class="function">isLeaf</span><span class="symbol">())</span><span class="normal"> </span><span class="cbracket">{</span>
+<span class="normal">                </span><span class="type">boolean</span><span class="normal"> bit </span><span class="symbol">=</span><span class="normal"> BinaryStdIn</span><span class="symbol">.</span><span class="function">readBoolean</span><span class="symbol">();</span>
+<span class="normal">                </span><span class="keyword">if</span><span class="normal"> </span><span class="symbol">(</span><span class="normal">bit</span><span class="symbol">)</span><span class="normal"> x </span><span class="symbol">=</span><span class="normal"> x</span><span class="symbol">.</span><span class="normal">right</span><span class="symbol">;</span>
+<span class="normal">                </span><span class="keyword">else</span><span class="normal">     x </span><span class="symbol">=</span><span class="normal"> x</span><span class="symbol">.</span><span class="normal">left</span><span class="symbol">;</span>
+<span class="normal">            </span><span class="cbracket">}</span>
+<span class="normal">            BinaryStdOut</span><span class="symbol">.</span><span class="function">write</span><span class="symbol">(</span><span class="normal">x</span><span class="symbol">.</span><span class="normal">ch</span><span class="symbol">);</span>
+<span class="normal">        </span><span class="cbracket">}</span>
+<span class="normal">        BinaryStdOut</span><span class="symbol">.</span><span class="function">flush</span><span class="symbol">();</span>
+<span class="normal">    </span><span class="cbracket">}</span>
+
+
+<span class="normal">    </span><span class="keyword">private</span><span class="normal"> </span><span class="keyword">static</span><span class="normal"> Node </span><span class="function">readTrie</span><span class="symbol">()</span><span class="normal"> </span><span class="cbracket">{</span>
+<span class="normal">        </span><span class="type">boolean</span><span class="normal"> isLeaf </span><span class="symbol">=</span><span class="normal"> BinaryStdIn</span><span class="symbol">.</span><span class="function">readBoolean</span><span class="symbol">();</span>
+<span class="normal">        </span><span class="keyword">if</span><span class="normal"> </span><span class="symbol">(</span><span class="normal">isLeaf</span><span class="symbol">)</span><span class="normal"> </span><span class="cbracket">{</span>
+<span class="normal">            </span><span class="keyword">return</span><span class="normal"> </span><span class="keyword">new</span><span class="normal"> </span><span class="function">Node</span><span class="symbol">(</span><span class="normal">BinaryStdIn</span><span class="symbol">.</span><span class="function">readChar</span><span class="symbol">(),</span><span class="normal"> </span><span class="symbol">-</span><span class="number">1</span><span class="symbol">,</span><span class="normal"> </span><span class="keyword">null</span><span class="symbol">,</span><span class="normal"> </span><span class="keyword">null</span><span class="symbol">);</span>
+<span class="normal">        </span><span class="cbracket">}</span>
+<span class="normal">        </span><span class="keyword">else</span><span class="normal"> </span><span class="cbracket">{</span>
+<span class="normal">            </span><span class="keyword">return</span><span class="normal"> </span><span class="keyword">new</span><span class="normal"> </span><span class="function">Node</span><span class="symbol">(</span><span class="string">'</span><span class="specialchar">\0</span><span class="string">'</span><span class="symbol">,</span><span class="normal"> </span><span class="symbol">-</span><span class="number">1</span><span class="symbol">,</span><span class="normal"> </span><span class="function">readTrie</span><span class="symbol">(),</span><span class="normal"> </span><span class="function">readTrie</span><span class="symbol">());</span>
+<span class="normal">        </span><span class="cbracket">}</span>
+<span class="normal">    </span><span class="cbracket">}</span>
+
+
+<span class="normal">    </span><span class="keyword">public</span><span class="normal"> </span><span class="keyword">static</span><span class="normal"> </span><span class="type">void</span><span class="normal"> </span><span class="function">main</span><span class="symbol">(</span><span class="normal">String</span><span class="symbol">[]</span><span class="normal"> args</span><span class="symbol">)</span><span class="normal"> </span><span class="cbracket">{</span>
+<span class="normal">        </span><span class="keyword">if</span><span class="normal">      </span><span class="symbol">(</span><span class="normal">args</span><span class="symbol">[</span><span class="number">0</span><span class="symbol">].</span><span class="function">equals</span><span class="symbol">(</span><span class="string">"-"</span><span class="symbol">))</span><span class="normal"> </span><span class="function">compress</span><span class="symbol">();</span>
+<span class="normal">        </span><span class="keyword">else</span><span class="normal"> </span><span class="keyword">if</span><span class="normal"> </span><span class="symbol">(</span><span class="normal">args</span><span class="symbol">[</span><span class="number">0</span><span class="symbol">].</span><span class="function">equals</span><span class="symbol">(</span><span class="string">"+"</span><span class="symbol">))</span><span class="normal"> </span><span class="function">expand</span><span class="symbol">();</span>
+<span class="normal">        </span><span class="keyword">else</span><span class="normal"> </span><span class="keyword">throw</span><span class="normal"> </span><span class="keyword">new</span><span class="normal"> </span><span class="function">RuntimeException</span><span class="symbol">(</span><span class="string">"Illegal command line argument"</span><span class="symbol">);</span>
+<span class="normal">    </span><span class="cbracket">}</span>
+
+<span class="cbracket">}</span>
+</tt></pre>
+
+<script type="text/javascript">
+var gaJsHost = (("https:" == document.location.protocol) ? "https://ssl." : "http://www.");
+document.write(unescape("%3Cscript src='" + gaJsHost + "google-analytics.com/ga.js' type='text/javascript'%3E%3C/script%3E"));
+</script>
+<script type="text/javascript">
+try {
+var pageTracker = _gat._getTracker("UA-10811519-2");
+pageTracker._trackPageview();
+} catch(err) {}</script>
+
+</body>
+
+<p><br><address><small>
+Copyright &copy; 2007, Robert Sedgewick and Kevin Wayne.
+<br>Last updated: Tue Jan 19 11:17:59 EST 2010.
+</small></address>
+
+</html>
