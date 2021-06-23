@@ -225,7 +225,7 @@ public class ManagerListStudents{
             } 
         }
         //print report
-        System.out.printf("%-10s%-15s%-15s%-15s\n", "idName" , "Student name", "Semester", "Course Name");
+        System.out.printf("%-10s%-15s%-15s%-15s\n", "idName" , "Student name", "Course Name", "Total Course");
         for (int i = 0; i < report.size(); i++) 
         {
             report.get(i).displayReport();
