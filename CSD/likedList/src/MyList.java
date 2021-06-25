@@ -11,7 +11,13 @@ public class MyList {
     public boolean isEmpty() {
         return (size == 0);
     }
-    
+    void deleteAll()
+    {
+        head = null;
+        tail = null;
+        int size = 0;
+    }
+
     //1 
     void addToTail(int a) {
         Node p = new Node(a);
@@ -123,7 +129,16 @@ public class MyList {
             return (Integer) null;
         
     }
-
+    void deleteAll(int x)
+    {
+        Node p = head;
+        while (p != null) 
+        {
+            if (p.infor == x)
+                delete(p.infor);
+            p = p.next;
+        }
+    }
     //8
     void delete(int x) {
         if (isEmpty())
@@ -202,6 +217,10 @@ public class MyList {
         return result;
     }
     //12
+    void mergeSort()
+    {
+        mergeSort(head);
+    }
     Node mergeSort(Node h) {
         if (h == null || h.next == null) {
             return h;
@@ -316,6 +335,19 @@ public class MyList {
         }
         return res;
     }
+    int maxSecond()
+    {
+        int max = max();
+        int res = -100000000;
+        Node tmp = new Node();
+        tmp = head;
+        while (tmp != null) {
+            if ( tmp.infor != max )
+                res = Math.max(res, tmp.infor);
+            tmp = tmp.next;
+        }
+        return res;
+    }
 
     //19
     int min() {
@@ -402,5 +434,44 @@ public class MyList {
             tmp_l2 = tmp_l2.next;
         }
         return true ; 
+    }
+    public void sort(int indexStart , int indexEnd)
+    {
+        if(isEmpty()) return ;
+        Node startNode = head;
+        if(indexStart>=indexEnd) return;
+        if(indexEnd >size) return ;
+        int cnt = 1;
+        while(true)
+        {
+            if(cnt==indexStart) break;
+            startNode = startNode.next;
+            cnt++;
+        }
+        Node cur = startNode;
+        Node after = null;
+        indexEnd -= indexStart;
+        while(true)
+        {
+            boolean swapped = false;
+            cnt = 0;
+            cur=startNode;
+            while(cur!=null)
+            {
+                if(cnt+1 >indexEnd) break;
+                after = cur.next;
+                if(cur.infor>after.infor)
+                {
+                    int tmp = cur.infor;
+                    cur.infor = after.infor;
+                    after.infor = tmp;
+                    swapped = true;
+                }
+                cnt++;
+                cur = cur.next;
+                if(cnt==indexEnd) break;
+            }
+            if(!swapped) break;
+        }
     }
 }

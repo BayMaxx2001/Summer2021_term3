@@ -16,9 +16,19 @@ public class App {
         // listNumber.display();
         Node p = new Node();
         p = listNumber.search(2);
-        listNumber.addBefore(p, 10);
+        //listNumber.addBefore(p, 10);
         listNumber.display();
+
+        System.out.println("---");
+        listNumber.sort(1, 4);
+        listNumber.display();
+
         listNumber.deleteByID(1);
+        listNumber.display();
+        listNumber.mergeSort();
+        listNumber.display();
+        System.out.println(listNumber.maxSecond()+"--");
+        listNumber.deleteAll();
         listNumber.display();
     }
 }
