@@ -27,7 +27,7 @@ public class Validation {
     }
 
     public static int checkInputMenu(int min, int max){
-        View view = new View();
+        menu view = new menu();
         view.InitMenu();
         while(true)
         {
@@ -78,7 +78,8 @@ public class Validation {
             try {
                 String dateFormat = "dd/MM/yyyy";
                 String input = sc.nextLine();
-                if ( input == null){
+                if ( input == ""){
+                    // System.out.println("debug");
                     return null;
                 }
                 Date date = new SimpleDateFormat(dateFormat).parse(input);
@@ -149,18 +150,30 @@ public class Validation {
                 System.err.println("Input must not empty");
                 System.out.print("Enter again: ");
             }
-            boolean ok = false ;
+            
             input = standardizedID(input);
             for ( Storekeeper s : listStorekeeper){
                 if ( s.getId().equals(input) == true) {
-                    ok = true;
-                    break;
+                    return input;
                 }
             }
             System.out.println("ID not exist in list of Storekeeper");
-            if (ok== true)
-                return input;
         }
     }
-    
+    public static boolean checkIdExistStorekeeper(String id, ArrayList<Storekeeper> listStorekeeper) {
+        for(Storekeeper elements: listStorekeeper){
+            if ( elements.getId().equalsIgnoreCase(id)== true ) {
+                return false;
+            }
+        }
+        return true;
+    }
+    public static boolean checkIdExistProduct(String id, ArrayList<Products> listProduct) {
+        for(Products elements: listProduct){
+            if ( elements.getId().equalsIgnoreCase(id) == true ) {
+                return false;
+            }
+        }
+        return true;
+    }
 }
