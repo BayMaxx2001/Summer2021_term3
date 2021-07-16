@@ -22,7 +22,6 @@ public class Main {
                     double planTo = Valadition.checkInputPlan(planFrom + 0.5, 17.5, "Plan To must be more than plan from " + planFrom + " and must be less than or equal 17.5");
                     String assignee = Valadition.checkInputString("Assignee: ");
                     String reviewer = Valadition.checkInputString("Reviewer: ");
-        
                     manager.addTask(requirementName, assignee, reviewer, taskType, date, planFrom, planTo);
                     System.out.println("Add Task Successfully!");
                     break;  
@@ -35,7 +34,8 @@ public class Main {
                     System.out.println("---------Delete Task------");
                     System.out.print("Enter id: ");
                     int findId = Valadition.checkInputLimit(1, manager.list.size()) - 1;
-                    manager.deleteTask(""+findId);
+                    String find = "" + findId;
+                    manager.deleteTask(find);
                     break;
                 case 3:
                     manager.displayDataTasks();

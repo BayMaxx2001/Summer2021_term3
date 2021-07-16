@@ -332,5 +332,13 @@ public class MyList {
             }
             return value;
         }
+
+    void appendAnotherList(MyList h) {
+        Node p = h.head;
+        while (p != null) {
+            addLast(p.info);
+            p = p.next;
+        }
+    }
     
 }

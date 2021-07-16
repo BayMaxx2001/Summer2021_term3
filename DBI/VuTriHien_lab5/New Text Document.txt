@@ -1,0 +1,79 @@
+-- Question 2:
+SELECT * FROM customers WHERE [state]='CA' AND country='USA'
+
+-- Question 3:
+SELECT productCode, productName, productCategory, buyPrice, suggestedRetailPrice
+FROM products
+WHERE productCategory = 'Classic Cars' AND suggestedRetailPrice >= 2*buyPrice
+ORDER BY suggestedRetailPrice DESC
+
+-- Question 4:
+SELECT c.customerNumber, c.customerName, c.city, c.country, c.salesRepEmployeeNumber, e.lastName as 'employeeLastName', e.firstName as 'employeeFirstName'
+FROM customers c INNER JOIN employees e
+ON c.salesRepEmployeeNumber = e.employeeNumber
+WHERE ((city='Paris' AND country='France') OR (city='NYC') OR (city='Brickhaven' AND country='USA'))
+ORDER BY country, city
+
+-- Question 5:
+SELECT c.customerNumber, c.customerName, c.city, c.country, SUM(p.amount) as totalAmountOfPayments
+FROM customers c INNER JOIN payments p
+ON c.customerNumber = p.customerNumber
+WHERE c.country = 'Germany'
+GROUP BY c.customerNumber, c.customerName, c.city, c.country
+ORDER BY SUM(p.amount)
+
+-- Question 6:
+SELECT c.customerNumber, c.customerName, c.city, c.[state], c.country
+FROM customers c INNER JOIN payments p
+ON c.customerNumber = p.customerNumber
+GROUP BY c.customerNumber, c.customerName, c.city, c.[state], c.country, p.amount
+HAVING p.amount = (select MAX(amount) FROM payments)
+
+-- Question 7:
+select MONTH(o.orderDate) as 'Month', YEAR(o.orderDate) as 'Year', p.productCategory,
+       COUNT(od.productCode) as 'numberOfProducts'
+FROM products p
+    INNER JOIN orderdetails od ON p.productCode = od.productCode
+    INNER JOIN orders o ON od.orderNumber = o.orderNumber
+WHERE MONTH(o.orderDate) IN (1,2,3) AND YEAR(o.orderDate)=2003
+GROUP BY MONTH(o.orderDate), YEAR(o.orderDate), p.productCategory
+ORDER BY MONTH(o.orderDate), p.productCategory
+
+GO
+-- Question 8:
+CREATE PROCEDURE proc_numberOfEmployee
+(
+    @officeCode varchar(10),
+    @numberOfEmployees int OUTPUT
+)
+AS
+BEGIN
+    SET @numberOfEmployees = (SELECT COUNT(*) FROM employees where officeCode=@officeCode)
+    RETURN @numberOfEmployees
+END
+
+-- Test Procedure
+DECLARE @x int
+EXECUTE proc_numberOfEmployee 1, @x OUTPUT
+SELECT @x as NumberOfEmployees
+
+go
+-- Question 9:
+CREATE TRIGGER tr_insertProduct
+ON products
+FOR INSERT 
+AS
+BEGIN
+    SELECT i.productCode, i.productName, i.productCategory, pc.textDescription
+    FROM inserted i INNER JOIN productCategories pc
+    on i.productCategory = pc.productCategory
+END
+
+-- Test Trigger
+insert into products(productCode, productName, productCategory, productVendor, productDescription, quantityInStock, buyPrice, suggestedRetailPrice)
+values
+('S700_9990', 'The Elizabeth', 'Ships', '…', '…', 100, 100.9, 200),
+('S700_9992', 'Boeing 767', 'Planes', 'Boeing', '…', 150, 1900.9, 4000)
+
+-- Question 10:
+DELETE FROM products WHERE productCode NOT IN (SELECT productCode FROM orderdetails)
