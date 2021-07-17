@@ -4,7 +4,7 @@ CREATE TABLE Departments
 	DeptID VARCHAR(15) PRIMARY KEY,
 	Name NVARCHAR(60)
 )
-GO 
+
 
 CREATE TABLE Offices
 (
@@ -13,7 +13,7 @@ CREATE TABLE Offices
 	Phone VARCHAR(15),
 	DeptID VARCHAR(15) FOREIGN KEY REFERENCES dbo.Departments(DeptID)
 )
-GO 
+
 
 
 CREATE TABLE Employees
@@ -22,7 +22,7 @@ CREATE TABLE Employees
 	FullName NVARCHAR(50),
 	OfficeNumber INT FOREIGN KEY REFERENCES dbo.Offices(OfficeNumber)
 )
-GO 
+
 
 CREATE TABLE WorkFor
 (
@@ -33,4 +33,4 @@ CREATE TABLE WorkFor
 	"To" DATE,
 	PRIMARY KEY("From", EmployeeID,DeptID)
 )
-GO 
+
