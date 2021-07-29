@@ -2,6 +2,7 @@ package p0021;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.Scanner;
 
 public class ManagerListStudents{
@@ -74,7 +75,19 @@ public class ManagerListStudents{
             System.err.println("Not exist.");
         } 
         else {
-            Collections.sort(listStudentFindByName);
+            Collections.sort(listStudentFindByName, new Comparator<Student>() {
+                @Override
+                public int compare(Student o1, Student o2) {
+                    String xau1 = o1.getStudentName();
+                    String xau2 = o2.getStudentName();
+                    String[] a1 = xau1.split(" ");
+                    String[] a2 = xau2.split(" ");
+                    int length1 = a1.length;
+                    char k = a1[a1.length-1].charAt(0);
+                    char k2 = a2[a2.length-1].charAt(0);
+                    return k2 - k ;  
+                }
+            });
             System.out.printf("%-10s%-15s%-15s%-15s\n", "idName" , "Student name", "Semester", "Course Name");
             
             for (Student student : listStudentFindByName) {
